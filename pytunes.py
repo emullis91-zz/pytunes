@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 '''
 PyTunes is a Python script that queues and plays
