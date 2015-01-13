@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+<<<<<<< HEAD
+=======
+
+>>>>>>> b28947640f9ef019643488c36bf1365e667ef9d9
 '''
 PyTunes is a Python script that queues and plays
 music on the user's computer via the default system 
