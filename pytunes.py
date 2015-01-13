@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 '''
 PyTunes is a Python script that queues and plays
 music on the user's computer via the default system 
@@ -13,7 +13,6 @@ Shuffle
 
 TODO:
 multithreading/playback control
-Scrobbler delay
 Lyrics searching/printing
 
 '''
@@ -23,18 +22,10 @@ print "Loading modules...."
 
 '''Import modules and dependencies'''
 from os import system
+from time import time
 import sys
-import TrackQueue, getpass, platform
+import TrackQueue, getpass
 import eyed3
-
-'''Global variables include the OS family (OS X or Linux) 
-   being used, and the system program used to play music 
-   files (afplay or aplay).'''
-os_fam = platform.system()
-if os_fam == "Darwin":
-    sys_player = "afplay"
-elif os_fam == "Linux":
-    sys_player = "aplay"
 
 def parse_opts(args):
     options = {}
@@ -93,7 +84,7 @@ def main():
     while not tqueue.empty():
         system('clear')
         track_path = tqueue.get()
-        command = "%s \"%s\"" % (sys_player, track_path)
+        command = "afplay \"%s\"" % track_path
         artist, title, album = get_metadata(track_path)
         print "Now playing: \n%s\n%s\n%s" % (artist, title, album)
         system(command)
