@@ -1,4 +1,4 @@
-pytunes is a music player that uses the unix `afplay` utility to queue and play music files on the user's hard drive.
+pytunes is a music player that runs in the user's command line. It uses one of two system programs (`aplay` for Linux, `afplay` for OS X) to play files after queueing them from the user's music directory tree.
 
 ####Dependencies
 - [eyed3](http://eyed3.nicfit.net/)
