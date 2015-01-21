@@ -27,7 +27,7 @@ import sys
 import TrackQueue, getpass
 import eyed3
 
-<<<<<<< HEAD
+
 '''Global variables include the OS family (OS X or Linux) 
    being used, and the system program used to play music 
    files (afplay or aplay).'''
@@ -37,8 +37,6 @@ if os_fam == "Darwin":
 elif os_fam == "Linux":
     sys_player = "mpg123"
 
-=======
->>>>>>> master
 def parse_opts(args):
     options = {}
     optcodes = [('a', 'album'), 
