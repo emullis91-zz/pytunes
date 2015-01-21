@@ -35,7 +35,7 @@ os_fam = platform.system()
 if os_fam == "Darwin":
     sys_player = "afplay"
 elif os_fam == "Linux":
-    sys_player = "aplay"
+    sys_player = "mpg123"
 
 def parse_opts(args):
     options = {}
