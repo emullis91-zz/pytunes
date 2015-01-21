@@ -2,7 +2,7 @@ pytunes is a music player that runs in the user's command line. It uses one of t
 
 ####Dependencies
 - [eyed3](http://eyed3.nicfit.net/)
-- [pylast](https://code.google.com/p/pylast/) (Only needed for track scrobbling)
+- [pylast](https://code.google.com/p/pylast/) (Only needed for Last.FM scrobbling)
 
 ####Usage/Options
 ```
