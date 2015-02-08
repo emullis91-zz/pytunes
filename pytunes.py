@@ -4,89 +4,106 @@ PyTunes is a Python script that queues and plays
 music on the user's computer via the default system 
 program that plays music files on the user's OS.
 
-Version 0.2.2
+Version 0.2.3
 Features:
 Track queueing (one track or one album)
 Track metadata output (artist, title, and album title)
 Last.FM scrobbler
 Shuffle
 
-TODO:
-multithreading/playback control
-Lyrics searching/printing
 
+TODO:
+config parsing for metadata display
+multithreading/playback control
+lyrics scraping
 '''
-version = '0.2.2'
-print "PyTunes Version %s" % version
+
+__version__ = '0.2.3'
+
+print "PyTunes Version %s" % __version__
 print "Loading modules...."
 
-'''Import modules and dependencies'''
+# Import modules and dependencies
 from os import system
 from time import time
-import sys
-import TrackQueue, getpass
-import eyed3
+import sys, platform
+import eyed3, getpass
+import TrackQueue as TQ
+import OptionParser as OP
+import ConfigParser as CP
+
+# open program's config file for parsing as needed
+conf = CP.ConfigParser()
+conf.read("pytunes.conf")
 
 
 '''Global variables include the OS family (OS X or Linux) 
    being used, and the system program used to play music 
    files (afplay or aplay).'''
-os_fam = platform.system()
-if os_fam == "Darwin":
-    sys_player = "afplay"
-elif os_fam == "Linux":
-    sys_player = "mpg123"
+if not conf.get('sys', 'player'):
+    os_fam = platform.system()
+    if os_fam == "Darwin":
+        sys_player = "afplay"
+    elif os_fam == "Linux":
+        sys_player = "mpg123"
+else: 
+    sys_player = conf.get('sys', 'player')
 
-def parse_opts(args):
-    options = {}
-    optcodes = [('a', 'album'), 
-                ('r', 'shuffle'), 
-                ('s', 'scrobble'),
-                ('l', 'lyrics')]
-    if args:
-        for code, name in optcodes:
-            options[name] = code in args[0]
-    else:
-        for code, name in optcodes:
-            options[name] = False
-    return options
 
 def get_metadata(filepath):
+    # todo: read config file for track metadata
+    # and related info.
     trackfile = eyed3.load(filepath)
     return (trackfile.tag.artist,
             trackfile.tag.title,
             trackfile.tag.album)
  
+
 def main():
 
-    tqueue = TrackQueue.TrackQueue()
-    
-    '''parse the first argument which is the 'artist - (album/track)' query'''
-    artist_query = sys.argv[1].split('-')[0].strip()
-    tracks_query = sys.argv[1].split('-')[1].strip()
-    options = parse_opts(sys.argv[2:])
+    tqueue = TQ.TrackQueue()
 
-    if not options['album']:
+    all_options = ["album", "random", "scrobble"]
+    oparse = OP.OptionParser(*all_options)
+    oparse.set_defaults()
+
+    if sys.argv[1][0] == "-":
+        oparse.parse(sys.argv[1])
+        artist_query = sys.argv[2].split('-')[0].strip()
+        tracks_query = sys.argv[2].split('-')[1].strip()
+    else:
+        artist_query = sys.argv[1].split('-')[0].strip()
+        tracks_query = sys.argv[1].split('-')[1].strip()
+
+    if oparse.opt_map['a']:
+        tqueue.queue_album(artist_query, tracks_query, oparse.opt_map['r'])
+    else:
         tqueue.queue_track(artist_query, tracks_query)
-    else:    
-        tqueue.queue_album(artist_query, tracks_query, options['shuffle'])
 
-    if options['scrobble']:
-
-        '''Import scrobbling dependencies'''
+    if oparse.opt_map['s']:
+        # Import scrobbling dependencies
         import pylast
 
         try:
-            API_KEY = '39164b1b13c9a1480a4266da5eb5b1b2'
-            API_SECRET = '790d7e09963606149f61f625b1635f75'
-            username = raw_input("Last.FM username: ")
-            password = getpass.getpass("Last.FM password: ")
+            API_KEY = conf.get('lastfm', 'API_KEY')
+            API_SECRET = conf.get('lastfm', 'API_SECRET')
+         
+            username = conf.get('lastfm', 'user')
+            password_hash = conf.get('lastfm', 'pass')
+            
+            if not username or not password_hash:
+                username = raw_input("Last.FM username: ")
+                password_hash = pylast.md5(getpass.getpass("Last.FM password: "))
+
+            print "Logging user %s into Last.FM..." % username
+
             NET = pylast.LastFMNetwork(api_key = API_KEY, api_secret = API_SECRET,
-                  username = username, password_hash = pylast.md5(password))
-            SESSION_KEY = pylast.SessionKeyGenerator(NET).get_session_key(username, pylast.md5(password))
+                username = username, password_hash = password_hash)
+            SESSION_KEY = pylast.SessionKeyGenerator(NET).get_session_key(
+                username, password_hash)
             NET.session_key = SESSION_KEY
         
-        #TODO: Improve exception handling
+        #todo: Improve exception handling
         except:
             print "An exception occurred."
             sys.exit()
@@ -94,12 +111,12 @@ def main():
     while not tqueue.empty():
         system('clear')
         track_path = tqueue.get()
-        command = "afplay \"%s\"" % track_path
+        command = "%s \"%s\"" % (sys_player, track_path)
         artist, title, album = get_metadata(track_path)
         print "Now playing: \n%s\n%s\n%s" % (artist, title, album)
         system(command)
         
-        if options['scrobble']:
+        if oparse.opt_map['s']:
             NET.scrobble(artist, title, int(time()))
         
         #if options['lyrics']:
