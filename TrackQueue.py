@@ -1,11 +1,15 @@
 from Queue import Queue
+import ConfigParser as CP
 from os import walk
 from random import shuffle
-from getpass import getuser
 import re
 
+conf = CP.ConfigParser()
+conf.read('pytunes.conf')
 
-music_dir = "/Users/%s/Music/" % getuser()
+# music_dir in the conf file must be the full path to your
+# music directory, with an ending forward slash.
+music_dir = conf.get('sys', 'music_dir')
 
 class TrackQueue(Queue, object):
     def __init__(self):
@@ -15,7 +19,8 @@ class TrackQueue(Queue, object):
         searchpath = music_dir + artist_query
         for root, d, files in walk(searchpath):
             for track in files:
-                if re.search(song_query, track, re.I): putpath = root + "/%s" % track
+                if re.search(song_query, track, re.I): 
+                    putpath = root + "/%s" % track
         self.put(putpath)
 
 
