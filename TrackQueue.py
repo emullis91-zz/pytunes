@@ -24,11 +24,13 @@ class TrackQueue(Queue, object):
         self.put(putpath)
 
 
-    def queue_album(self, artist_query, album_query, shuff = False):        
+    def queue_album(self, artist_query, album_query, shuff = False):
         searchpath = music_dir + "%s/%s" % (artist_query, album_query)
         for root, d, files in walk(searchpath):
             if shuff:
                 shuffle(files)
+            else:
+                files = sorted(files)
             for track in files:
                 if re.search('.mp3', track):
                     putpath = root + "/%s" % track

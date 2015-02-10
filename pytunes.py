@@ -42,14 +42,12 @@ conf.read("pytunes.conf")
    files (afplay or aplay).'''
 if not conf.get('sys', 'player'):
     os_fam = platform.system()
-    print "OS Detected: %s"
     if os_fam == "Darwin":
         sys_player = "afplay"
     elif os_fam == "Linux":
         sys_player = "mpg123"
 else: 
     sys_player = conf.get('sys', 'player')
-print sys_player
 
 def get_metadata(filepath):
     # todo: read config file for track metadata
@@ -115,7 +113,6 @@ def main():
     while not tqueue.empty():
         system('clear')
         track_path = tqueue.get()
-        print track_path
         command = "%s \"%s\"" % (sys_player, track_path)
         artist, title, album = get_metadata(track_path)
         print "Now playing: \n%s\n%s\n%s" % (artist, title, album)
